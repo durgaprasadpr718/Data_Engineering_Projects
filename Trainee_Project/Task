@@ -1,0 +1,20 @@
+Explain about Pandas.Why we use pandas? 
+What can Pandas do?
+
+And do the following with the given CSV file
+
+1.Datatype conversions
+   -- string to int
+   -- float/ double to int
+2.Reindexing columns.
+3.Read data from nth row from file
+4.Read data from different sheets in an Excel file.
+5.Remove columns
+6.Add new columns
+7.Filter data 
+   -- based on a single/ multiple values
+   -- based on a number range
+8.Split data from single column to multiple columns using a delimiter
+9.Join data between two data frames
+  -- explore different types of joins
+1o.Rename columns names in dataframe.
