@@ -1,1 +1,0 @@
-In this problem statement, the goal is to predict the suitable price of an item given its user-inputted text descriptions of their products, product category name, brand name, and item condition in order to minimize the difference between predicted price and actual price.
