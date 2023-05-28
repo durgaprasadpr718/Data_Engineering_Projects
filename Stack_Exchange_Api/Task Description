@@ -1,0 +1,4 @@
+Stack Exchange API provides data from Stackoverflow.
+Based on the API design and implement a process/processes to fetch data from the API such that it can answer important business queries that can contribute into the market research for a developer publishing company. 
+An example of such a query could be: “What are the top trending tags appearing in StackOverFlow this month?”
+There is no limit on how many queries you can consider, however please prioritize completing an end-to-end working solution rather than queries.  You are free to use any technology you like for setting up the process to fetch, model and store the data. The process need not to use the same database/environments, however it is important that we use technology that we can connect BI to and have data lineage tracked. 
