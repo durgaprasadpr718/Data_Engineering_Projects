@@ -1,0 +1,1 @@
+You have been hired by a fictional company called "DataCo" to build a real-time data pipeline that streams data from Kafka, processes the data in a data store, and indexes the processed data in Elasticsearch. The data pipeline will be used to ingest and analyze clickstream data from a web application.
