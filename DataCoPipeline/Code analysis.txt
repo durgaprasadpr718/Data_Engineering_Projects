@@ -1,0 +1,13 @@
+1.Added Elasticsearch configuration: Define the Elasticsearch host (elasticsearch_host), port (elasticsearch_port), and index name (elasticsearch_index).
+
+2.Added Elasticsearch client initialization: Create an Elasticsearch client using the elasticsearch.Elasticsearch class.
+
+3.Added variables for aggregations: Use the aggregated_data dictionary to store and aggregate clickstream data by URL and country.
+
+4.Added process_clickstream_data function: This function is called periodically to process the stored clickstream data and perform aggregations. For each aggregated data, it calculates the number of clicks, unique users, and average time spent. Then it creates a document representing the aggregation and indexes it in Elasticsearch.
+
+5.Modified the main loop: The main loop consumes clickstream messages from Kafka, processes them, and performs aggregations by URL and country. It also checks if it's time for periodic processing based on the defined interval. If it's time, it calls the process_clickstream_data function to perform aggregations and index the data in Elasticsearch.
+
+6.Added processing of remaining clickstream data: After the loop breaks (e.g., due to a keyboard interrupt), the code calls the process_clickstream_data function to process any remaining clickstream data before exiting.
+
+Make sure to have Kafka and Elasticsearch running with the appropriate configurations before running this code. Also, adjust the processing interval (processing_interval_minutes) as needed.

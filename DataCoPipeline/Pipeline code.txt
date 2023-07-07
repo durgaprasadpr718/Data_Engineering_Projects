@@ -1,0 +1,109 @@
+from confluent_kafka import Consumer, KafkaException
+from elasticsearch import Elasticsearch
+from datetime import datetime
+import json
+
+# Kafka configuration
+kafka_bootstrap_servers = 'localhost:9092'
+kafka_topic = 'clickstream_topic'
+
+# Elasticsearch configuration
+elasticsearch_host = 'localhost'
+elasticsearch_port = 9200
+elasticsearch_index = 'clickstream_index'
+
+# Create an Elasticsearch client
+es = Elasticsearch([{'host': elasticsearch_host, 'port': elasticsearch_port}])
+
+# Periodic processing interval (e.g., hourly or daily)
+processing_interval_minutes = 60
+
+# Create a Kafka consumer
+consumer = Consumer({
+    'bootstrap.servers': kafka_bootstrap_servers,
+    'group.id': 'clickstream_consumer_group',
+    'auto.offset.reset': 'earliest'
+})
+
+# Subscribe to the Kafka topic
+consumer.subscribe([kafka_topic])
+
+# Variables for aggregations
+aggregated_data = {}
+
+# Function to process the stored clickstream data and perform aggregations
+def process_clickstream_data():
+    for url_country, data in aggregated_data.items():
+        # Calculate aggregations
+        num_clicks = len(data['user_ids'])
+        num_unique_users = len(set(data['user_ids']))
+        avg_time_spent = sum(data['time_spent']) / len(data['time_spent'])
+        
+        # Create document for indexing
+        doc = {
+            'url': data['url'],
+            'country': data['country'],
+            'num_clicks': num_clicks,
+            'num_unique_users': num_unique_users,
+            'avg_time_spent': avg_time_spent
+        }
+        
+        # Index the document in Elasticsearch
+        es.index(index=elasticsearch_index, body=doc)
+        
+    # Reset the aggregated data
+    aggregated_data.clear()
+
+# Process and index clickstream data periodically
+while True:
+    try:
+        # Consume messages from Kafka
+        messages = consumer.consume(num_messages=100, timeout=1.0)
+        
+        for message in messages:
+            if message is None:
+                continue
+            if message.error() is not None:
+                if message.error().code() == KafkaException._PARTITION_EOF:
+                    continue
+                else:
+                    print(f'Error: {message.error().str()}')
+                    continue
+
+            # Process the clickstream message
+            clickstream_data = json.loads(message.value())
+            event_id = clickstream_data['event_id']
+            user_id = clickstream_data['user_id']
+            timestamp = clickstream_data['timestamp']
+            url = clickstream_data['url']
+            country = clickstream_data['country']
+            city = clickstream_data['city']
+            browser = clickstream_data['browser']
+            operating_system = clickstream_data['operating_system']
+            device = clickstream_data['device']
+            
+            # Perform aggregations by URL and country
+            url_country = f'{url}_{country}'
+            if url_country not in aggregated_data:
+                aggregated_data[url_country] = {
+                    'url': url,
+                    'country': country,
+                    'user_ids': [],
+                    'time_spent': []
+                }
+            
+            aggregated_data[url_country]['user_ids'].append(user_id)
+            aggregated_data[url_country]['time_spent'].append(timestamp)
+        
+        # Check if it's time for periodic processing
+        if datetime.now().minute % processing_interval_minutes == 0:
+            process_clickstream_data()
+        
+    except KeyboardInterrupt:
+        break
+
+# Process remaining clickstream data before exiting
+process_clickstream_data()
+
+# Close Kafka consumer
+consumer.close()
